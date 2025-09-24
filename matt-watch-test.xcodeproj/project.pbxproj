@@ -6,14 +6,44 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C911E06C2E848295005D2AAF /* matt-watch-test-app Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C911E06B2E848295005D2AAF /* matt-watch-test-app Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C911E06D2E848295005D2AAF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C911E04E2E848263005D2AAF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C911E06A2E848295005D2AAF;
+			remoteInfo = "matt-watch-test-app Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C911E0792E848297005D2AAF /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				C911E06C2E848295005D2AAF /* matt-watch-test-app Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		C911E0562E848263005D2AAF /* matt-watch-test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "matt-watch-test.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C911E0662E848295005D2AAF /* matt-watch-test-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "matt-watch-test-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C911E06B2E848295005D2AAF /* matt-watch-test-app Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "matt-watch-test-app Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C911E0582E848263005D2AAF /* matt-watch-test */ = {
+		C911E06F2E848295005D2AAF /* matt-watch-test-app Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "matt-watch-test";
+			path = "matt-watch-test-app Watch App";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,13 +56,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C911E0682E848295005D2AAF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		C911E04D2E848263005D2AAF = {
 			isa = PBXGroup;
 			children = (
-				C911E0582E848263005D2AAF /* matt-watch-test */,
+				C911E06F2E848295005D2AAF /* matt-watch-test-app Watch App */,
 				C911E0572E848263005D2AAF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +78,8 @@
 			isa = PBXGroup;
 			children = (
 				C911E0562E848263005D2AAF /* matt-watch-test.app */,
+				C911E0662E848295005D2AAF /* matt-watch-test-app.app */,
+				C911E06B2E848295005D2AAF /* matt-watch-test-app Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,14 +99,52 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				C911E0582E848263005D2AAF /* matt-watch-test */,
-			);
 			name = "matt-watch-test";
 			packageProductDependencies = (
 			);
 			productName = "matt-watch-test";
 			productReference = C911E0562E848263005D2AAF /* matt-watch-test.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C911E0652E848295005D2AAF /* matt-watch-test-app */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C911E07A2E848297005D2AAF /* Build configuration list for PBXNativeTarget "matt-watch-test-app" */;
+			buildPhases = (
+				C911E0642E848295005D2AAF /* Resources */,
+				C911E0792E848297005D2AAF /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C911E06E2E848295005D2AAF /* PBXTargetDependency */,
+			);
+			name = "matt-watch-test-app";
+			packageProductDependencies = (
+			);
+			productName = "matt-watch-test-app";
+			productReference = C911E0662E848295005D2AAF /* matt-watch-test-app.app */;
+			productType = "com.apple.product-type.application.watchapp2-container";
+		};
+		C911E06A2E848295005D2AAF /* matt-watch-test-app Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C911E0762E848297005D2AAF /* Build configuration list for PBXNativeTarget "matt-watch-test-app Watch App" */;
+			buildPhases = (
+				C911E0672E848295005D2AAF /* Sources */,
+				C911E0682E848295005D2AAF /* Frameworks */,
+				C911E0692E848295005D2AAF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C911E06F2E848295005D2AAF /* matt-watch-test-app Watch App */,
+			);
+			name = "matt-watch-test-app Watch App";
+			packageProductDependencies = (
+			);
+			productName = "matt-watch-test-app Watch App";
+			productReference = C911E06B2E848295005D2AAF /* matt-watch-test-app Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -81,6 +158,12 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					C911E0552E848263005D2AAF = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					C911E0652E848295005D2AAF = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					C911E06A2E848295005D2AAF = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
@@ -100,12 +183,28 @@
 			projectRoot = "";
 			targets = (
 				C911E0552E848263005D2AAF /* matt-watch-test */,
+				C911E0652E848295005D2AAF /* matt-watch-test-app */,
+				C911E06A2E848295005D2AAF /* matt-watch-test-app Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		C911E0542E848263005D2AAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C911E0642E848295005D2AAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C911E0692E848295005D2AAF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +221,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C911E0672E848295005D2AAF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C911E06E2E848295005D2AAF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C911E06A2E848295005D2AAF /* matt-watch-test-app Watch App */;
+			targetProxy = C911E06D2E848295005D2AAF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C911E05F2E848266005D2AAF /* Debug */ = {
@@ -323,6 +437,104 @@
 			};
 			name = Release;
 		};
+		C911E0772E848297005D2AAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "matt-watch-test-app";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.redleg.matt-watch-test-app.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		C911E0782E848297005D2AAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "matt-watch-test-app";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.redleg.matt-watch-test-app.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		C911E07B2E848297005D2AAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_KEY_CFBundleDisplayName = "matt-watch-test-app";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.redleg.matt-watch-test-app";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C911E07C2E848297005D2AAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_KEY_CFBundleDisplayName = "matt-watch-test-app";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.redleg.matt-watch-test-app";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -340,6 +552,24 @@
 			buildConfigurations = (
 				C911E0622E848266005D2AAF /* Debug */,
 				C911E0632E848266005D2AAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C911E0762E848297005D2AAF /* Build configuration list for PBXNativeTarget "matt-watch-test-app Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C911E0772E848297005D2AAF /* Debug */,
+				C911E0782E848297005D2AAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C911E07A2E848297005D2AAF /* Build configuration list for PBXNativeTarget "matt-watch-test-app" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C911E07B2E848297005D2AAF /* Debug */,
+				C911E07C2E848297005D2AAF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
