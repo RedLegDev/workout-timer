@@ -38,11 +38,13 @@ class WorkoutTimer {
     func completeSet() {
         guard isExercising else { return }
         
+        timer?.invalidate()
+        timer = nil
+        
         isExercising = false
         isResting = true
         restTime = 0
         hasPlayedRestCue = false
-        timer?.invalidate()
         
         // Haptic feedback for completing set
         WKInterfaceDevice.current().play(.success)
@@ -104,9 +106,9 @@ struct WorkoutTimerView: View {
     @State private var workoutTimer = WorkoutTimer()
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             // Action Buttons - Top for easy access
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 if !workoutTimer.isExercising && !workoutTimer.isResting {
                     // Start Exercise Button
                     Button("Start Set") {
@@ -132,27 +134,14 @@ struct WorkoutTimerView: View {
                     .tint(.green)
                 }
                 
-                // Secondary buttons in a row
-                HStack(spacing: 12) {
-                    // Reset Exercise Button
-                    if workoutTimer.currentSet > 0 {
-                        Button("New Exercise") {
-                            workoutTimer.resetExercise()
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                        .tint(.red)
+                // Secondary buttons - New Exercise only
+                if workoutTimer.currentSet > 0 {
+                    Button("New Exercise") {
+                        workoutTimer.resetExercise()
                     }
-                    
-                    // Stop Current Activity Button (if active)
-                    if workoutTimer.isExercising || workoutTimer.isResting {
-                        Button("Stop") {
-                            workoutTimer.stopCurrentActivity()
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                        .tint(.gray)
-                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .tint(.red)
                 }
             }
             .padding(.horizontal)
@@ -162,41 +151,41 @@ struct WorkoutTimerView: View {
             // Set Counter and Timer Display - Side by Side
             HStack(spacing: 16) {
                 // Set Counter
-                VStack(spacing: 4) {
+                VStack(spacing: 2) {
                     Text("SET")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundColor(.secondary)
                     Text("\(workoutTimer.currentSet)")
-                        .font(.largeTitle)
+                        .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                 }
                 .frame(maxWidth: .infinity)
                 
                 // Status and Timer Display
-                VStack(spacing: 4) {
+                VStack(spacing: 2) {
                     if workoutTimer.isExercising {
                         Text("EXERCISE")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundColor(.green)
                         Text(formatTime(workoutTimer.exerciseTime))
-                            .font(.title2)
+                            .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(.green)
                     } else if workoutTimer.isResting {
                         Text("REST")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundColor(.orange)
                         Text(formatTime(workoutTimer.restTime))
-                            .font(.title2)
+                            .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(.orange)
                     } else {
                         Text("READY")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundColor(.secondary)
                         Text("--:--")
-                            .font(.title2)
+                            .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(.secondary)
                     }
@@ -205,7 +194,16 @@ struct WorkoutTimerView: View {
             }
             .padding(.horizontal)
             
-            Spacer()
+            // Stop button - Below timer when active
+            if workoutTimer.isExercising || workoutTimer.isResting {
+                Button("Stop") {
+                    workoutTimer.stopCurrentActivity()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.mini)
+                .tint(.gray)
+                .padding(.horizontal)
+            }
         }
         .navigationTitle("Workout")
         .navigationBarTitleDisplayMode(.inline)
