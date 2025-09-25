@@ -218,13 +218,17 @@ class WorkoutTimer {
     }
     
     private func sendNotification(title: String, body: String) {
+        // Remove any existing workout timer notifications first
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["workout-timer"])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["workout-timer"])
+        
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
         
         let request = UNNotificationRequest(
-            identifier: "workout-timer-\(Date().timeIntervalSince1970)",
+            identifier: "workout-timer",
             content: content,
             trigger: nil
         )
