@@ -218,24 +218,37 @@ class WorkoutTimer {
     }
     
     private func sendNotification(title: String, body: String) {
-        // Remove any existing workout timer notifications first
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["workout-timer"])
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["workout-timer"])
-        
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.sound = .default
-        
-        let request = UNNotificationRequest(
-            identifier: "workout-timer",
-            content: content,
-            trigger: nil
-        )
-        
-        UNUserNotificationCenter.current().add(request) { error in
+        // Request notification permission first
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
-                print("Error sending notification: \(error)")
+                print("Error requesting notification permission: \(error)")
+                return
+            }
+            
+            guard granted else {
+                print("Notification permission denied")
+                return
+            }
+            
+            // Remove any existing workout timer notifications first
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["workout-timer"])
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["workout-timer"])
+            
+            let content = UNMutableNotificationContent()
+            content.title = title
+            content.body = body
+            content.sound = .default
+            
+            let request = UNNotificationRequest(
+                identifier: "workout-timer",
+                content: content,
+                trigger: nil
+            )
+            
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error = error {
+                    print("Error sending notification: \(error)")
+                }
             }
         }
     }
