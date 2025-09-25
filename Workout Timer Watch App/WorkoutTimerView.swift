@@ -24,6 +24,11 @@ class WorkoutTimer {
     private var audioTimer: Timer?
     var audioEnabled = true
     
+    // Time tracking properties
+    private var exerciseStartTime: Date?
+    private var restStartTime: Date?
+    private var lastUpdateTime: Date?
+    
     func startExercise() {
         guard !isExercising else { return }
         
@@ -32,12 +37,16 @@ class WorkoutTimer {
         currentSet += 1
         exerciseTime = 0
         
+        // Record start time for accurate elapsed time calculation
+        exerciseStartTime = Date()
+        lastUpdateTime = Date()
+        
         // Haptic feedback for starting exercise
         WKInterfaceDevice.current().play(.start)
         
-        // Start main timer
+        // Start main timer for UI updates
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            self.exerciseTime += 1
+            self.updateExerciseTime()
         }
         
         // Start periodic haptic feedback every 30 seconds
@@ -45,9 +54,6 @@ class WorkoutTimer {
         
         // Start audio cues every minute
         startAudioCues()
-        
-        // Enable always-on display
-        enableAlwaysOnDisplay()
         
         // Send notification for exercise start
         sendNotification(title: "Exercise Started", body: "Set \(currentSet) - Timer running")
@@ -66,17 +72,15 @@ class WorkoutTimer {
         restTime = 0
         hasPlayedRestCue = false
         
+        // Record rest start time for accurate elapsed time calculation
+        restStartTime = Date()
+        lastUpdateTime = Date()
+        
         // Haptic feedback for completing set
         WKInterfaceDevice.current().play(.success)
         
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            self.restTime += 1
-            
-            // Audio cue at 1:30 rest time
-            if self.restTime == 90 && !self.hasPlayedRestCue {
-                self.hasPlayedRestCue = true
-                self.playRestCue()
-            }
+            self.updateRestTime()
         }
         
         // Start periodic haptic feedback for rest period
@@ -113,8 +117,10 @@ class WorkoutTimer {
         restTime = 0
         hasPlayedRestCue = false
         
-        // Disable always-on display
-        disableAlwaysOnDisplay()
+        // Clear timestamps
+        exerciseStartTime = nil
+        restStartTime = nil
+        lastUpdateTime = nil
         
         // Haptic feedback for reset
         WKInterfaceDevice.current().play(.click)
@@ -129,6 +135,11 @@ class WorkoutTimer {
         timer?.invalidate()
         isResting = false
         isExercising = false
+        
+        // Clear timestamps
+        exerciseStartTime = nil
+        restStartTime = nil
+        lastUpdateTime = nil
         
         // Disable always-on display
         disableAlwaysOnDisplay()
@@ -163,19 +174,6 @@ class WorkoutTimer {
         hapticTimer = nil
     }
     
-    private func enableAlwaysOnDisplay() {
-        // Enable always-on display for watchOS 6+
-        if #available(watchOS 6.0, *) {
-            WKExtension.shared().isAutorotating = false
-        }
-    }
-    
-    private func disableAlwaysOnDisplay() {
-        // Disable always-on display
-        if #available(watchOS 6.0, *) {
-            WKExtension.shared().isAutorotating = true
-        }
-    }
     
     private func startAudioCues() {
         guard audioEnabled else { return }
@@ -192,6 +190,35 @@ class WorkoutTimer {
     private func stopAudioCues() {
         audioTimer?.invalidate()
         audioTimer = nil
+    }
+    
+    private func updateExerciseTime() {
+        guard let startTime = exerciseStartTime else { return }
+        let now = Date()
+        exerciseTime = now.timeIntervalSince(startTime)
+        lastUpdateTime = now
+    }
+    
+    private func updateRestTime() {
+        guard let startTime = restStartTime else { return }
+        let now = Date()
+        restTime = now.timeIntervalSince(startTime)
+        lastUpdateTime = now
+        
+        // Audio cue at 1:30 rest time
+        if restTime >= 90 && !hasPlayedRestCue {
+            hasPlayedRestCue = true
+            playRestCue()
+        }
+    }
+    
+    // Method to get current accurate time when app becomes active
+    func refreshCurrentTime() {
+        if isExercising {
+            updateExerciseTime()
+        } else if isResting {
+            updateRestTime()
+        }
     }
     
     private func sendNotification(title: String, body: String) {
@@ -372,6 +399,10 @@ struct WorkoutTimerView: View {
         }
         .navigationTitle("Workout")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Refresh time when view appears to ensure accuracy
+            workoutTimer.refreshCurrentTime()
+        }
     }
     
     private func formatTime(_ timeInterval: TimeInterval) -> String {
