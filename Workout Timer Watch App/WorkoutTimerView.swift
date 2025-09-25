@@ -8,7 +8,6 @@
 import SwiftUI
 import WatchKit
 import AVFoundation
-import UserNotifications
 
 @Observable
 class WorkoutTimer {
@@ -54,8 +53,6 @@ class WorkoutTimer {
         // Start audio cues every minute
         startAudioCues()
         
-        // Send notification for exercise start
-        sendNotification(title: "Exercise Started", body: "Set \(currentSet) - Timer running")
     }
     
     func completeSet() {
@@ -88,8 +85,6 @@ class WorkoutTimer {
         // Start audio cues for rest period
         startAudioCues()
         
-        // Send notification for rest start
-        sendNotification(title: "Rest Started", body: "Set \(currentSet) complete - Rest timer running")
     }
     
     func startNextSet() {
@@ -124,8 +119,6 @@ class WorkoutTimer {
         // Haptic feedback for reset
         WKInterfaceDevice.current().play(.click)
         
-        // Send notification for reset
-        sendNotification(title: "Workout Reset", body: "Timer stopped and reset")
     }
     
     func stopCurrentActivity() {
@@ -143,8 +136,6 @@ class WorkoutTimer {
         // Haptic feedback for stopping
         WKInterfaceDevice.current().play(.stop)
         
-        // Send notification for stop
-        sendNotification(title: "Workout Stopped", body: "Timer stopped")
     }
     
     private func playRestCue() {
@@ -217,41 +208,6 @@ class WorkoutTimer {
         }
     }
     
-    private func sendNotification(title: String, body: String) {
-        // Request notification permission first
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error = error {
-                print("Error requesting notification permission: \(error)")
-                return
-            }
-            
-            guard granted else {
-                print("Notification permission denied")
-                return
-            }
-            
-            // Remove any existing workout timer notifications first
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["workout-timer"])
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["workout-timer"])
-            
-            let content = UNMutableNotificationContent()
-            content.title = title
-            content.body = body
-            content.sound = .default
-            
-            let request = UNNotificationRequest(
-                identifier: "workout-timer",
-                content: content,
-                trigger: nil
-            )
-            
-            UNUserNotificationCenter.current().add(request) { error in
-                if let error = error {
-                    print("Error sending notification: \(error)")
-                }
-            }
-        }
-    }
     
     func toggleAudio() {
         audioEnabled.toggle()
