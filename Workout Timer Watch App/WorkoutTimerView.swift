@@ -20,7 +20,6 @@ class WorkoutTimer {
     var timer: Timer?
     private var hasPlayedRestCue = false
     private var hapticTimer: Timer?
-    private var isAlwaysOnEnabled = true
     private var audioTimer: Timer?
     var audioEnabled = true
     
@@ -140,9 +139,6 @@ class WorkoutTimer {
         exerciseStartTime = nil
         restStartTime = nil
         lastUpdateTime = nil
-        
-        // Disable always-on display
-        disableAlwaysOnDisplay()
         
         // Haptic feedback for stopping
         WKInterfaceDevice.current().play(.stop)
