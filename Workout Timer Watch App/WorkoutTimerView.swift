@@ -8,6 +8,7 @@
 import SwiftUI
 import WatchKit
 import AVFoundation
+import UserNotifications
 
 @Observable
 class WorkoutTimer {
@@ -18,6 +19,10 @@ class WorkoutTimer {
     var restTime: TimeInterval = 0
     var timer: Timer?
     private var hasPlayedRestCue = false
+    private var hapticTimer: Timer?
+    private var isAlwaysOnEnabled = true
+    private var audioTimer: Timer?
+    var audioEnabled = true
     
     func startExercise() {
         guard !isExercising else { return }
@@ -30,14 +35,29 @@ class WorkoutTimer {
         // Haptic feedback for starting exercise
         WKInterfaceDevice.current().play(.start)
         
+        // Start main timer
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             self.exerciseTime += 1
         }
+        
+        // Start periodic haptic feedback every 30 seconds
+        startPeriodicHapticFeedback()
+        
+        // Start audio cues every minute
+        startAudioCues()
+        
+        // Enable always-on display
+        enableAlwaysOnDisplay()
+        
+        // Send notification for exercise start
+        sendNotification(title: "Exercise Started", body: "Set \(currentSet) - Timer running")
     }
     
     func completeSet() {
         guard isExercising else { return }
         
+        stopPeriodicHapticFeedback()
+        stopAudioCues()
         timer?.invalidate()
         timer = nil
         
@@ -58,11 +78,22 @@ class WorkoutTimer {
                 self.playRestCue()
             }
         }
+        
+        // Start periodic haptic feedback for rest period
+        startPeriodicHapticFeedback()
+        
+        // Start audio cues for rest period
+        startAudioCues()
+        
+        // Send notification for rest start
+        sendNotification(title: "Rest Started", body: "Set \(currentSet) complete - Rest timer running")
     }
     
     func startNextSet() {
         guard isResting else { return }
         
+        stopPeriodicHapticFeedback()
+        stopAudioCues()
         timer?.invalidate()
         
         // Haptic feedback for starting next set
@@ -72,6 +103,8 @@ class WorkoutTimer {
     }
     
     func resetExercise() {
+        stopPeriodicHapticFeedback()
+        stopAudioCues()
         timer?.invalidate()
         currentSet = 0
         isResting = false
@@ -80,17 +113,31 @@ class WorkoutTimer {
         restTime = 0
         hasPlayedRestCue = false
         
+        // Disable always-on display
+        disableAlwaysOnDisplay()
+        
         // Haptic feedback for reset
         WKInterfaceDevice.current().play(.click)
+        
+        // Send notification for reset
+        sendNotification(title: "Workout Reset", body: "Timer stopped and reset")
     }
     
     func stopCurrentActivity() {
+        stopPeriodicHapticFeedback()
+        stopAudioCues()
         timer?.invalidate()
         isResting = false
         isExercising = false
         
+        // Disable always-on display
+        disableAlwaysOnDisplay()
+        
         // Haptic feedback for stopping
         WKInterfaceDevice.current().play(.stop)
+        
+        // Send notification for stop
+        sendNotification(title: "Workout Stopped", body: "Timer stopped")
     }
     
     private func playRestCue() {
@@ -99,6 +146,80 @@ class WorkoutTimer {
         
         // Also provide haptic feedback
         WKInterfaceDevice.current().play(.directionUp)
+    }
+    
+    private func startPeriodicHapticFeedback() {
+        // Provide gentle haptic feedback every 30 seconds to indicate timer is running
+        hapticTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { _ in
+            if self.isExercising || self.isResting {
+                // Gentle tap to indicate timer is still running
+                WKInterfaceDevice.current().play(.click)
+            }
+        }
+    }
+    
+    private func stopPeriodicHapticFeedback() {
+        hapticTimer?.invalidate()
+        hapticTimer = nil
+    }
+    
+    private func enableAlwaysOnDisplay() {
+        // Enable always-on display for watchOS 6+
+        if #available(watchOS 6.0, *) {
+            WKExtension.shared().isAutorotating = false
+        }
+    }
+    
+    private func disableAlwaysOnDisplay() {
+        // Disable always-on display
+        if #available(watchOS 6.0, *) {
+            WKExtension.shared().isAutorotating = true
+        }
+    }
+    
+    private func startAudioCues() {
+        guard audioEnabled else { return }
+        
+        // Play audio cue every minute to indicate timer is running
+        audioTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { _ in
+            if self.isExercising || self.isResting {
+                // Gentle audio cue to indicate timer is still running
+                WKInterfaceDevice.current().play(.click)
+            }
+        }
+    }
+    
+    private func stopAudioCues() {
+        audioTimer?.invalidate()
+        audioTimer = nil
+    }
+    
+    private func sendNotification(title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        
+        let request = UNNotificationRequest(
+            identifier: "workout-timer-\(Date().timeIntervalSince1970)",
+            content: content,
+            trigger: nil
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error sending notification: \(error)")
+            }
+        }
+    }
+    
+    func toggleAudio() {
+        audioEnabled.toggle()
+        if audioEnabled && (isExercising || isResting) {
+            startAudioCues()
+        } else {
+            stopAudioCues()
+        }
     }
 }
 
@@ -134,14 +255,24 @@ struct WorkoutTimerView: View {
                     .tint(.green)
                 }
                 
-                // Secondary buttons - New Exercise only
-                if workoutTimer.currentSet > 0 {
-                    Button("New Exercise") {
-                        workoutTimer.resetExercise()
+                // Secondary buttons
+                HStack(spacing: 8) {
+                    if workoutTimer.currentSet > 0 {
+                        Button("New Exercise") {
+                            workoutTimer.resetExercise()
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .tint(.red)
+                    }
+                    
+                    // Audio toggle button
+                    Button(workoutTimer.audioEnabled ? "🔊" : "🔇") {
+                        workoutTimer.toggleAudio()
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
-                    .tint(.red)
+                    .tint(.blue)
                 }
             }
             .padding(.horizontal)
@@ -161,21 +292,46 @@ struct WorkoutTimerView: View {
                         .foregroundColor(.primary)
                 }
                 .frame(maxWidth: .infinity)
+                .background(
+                    // Subtle pulsing background when timer is active
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(workoutTimer.isExercising ? Color.green.opacity(0.1) : 
+                              workoutTimer.isResting ? Color.orange.opacity(0.1) : Color.clear)
+                        .scaleEffect(workoutTimer.isExercising || workoutTimer.isResting ? 1.05 : 1.0)
+                        .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), 
+                                 value: workoutTimer.isExercising || workoutTimer.isResting)
+                )
                 
                 // Status and Timer Display
                 VStack(spacing: 2) {
                     if workoutTimer.isExercising {
-                        Text("EXERCISE")
-                            .font(.caption2)
-                            .foregroundColor(.green)
+                        HStack(spacing: 4) {
+                            Text("EXERCISE")
+                                .font(.caption2)
+                                .foregroundColor(.green)
+                            // Active indicator dot
+                            Circle()
+                                .fill(.green)
+                                .frame(width: 6, height: 6)
+                                .scaleEffect(workoutTimer.isExercising ? 1.2 : 1.0)
+                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: workoutTimer.isExercising)
+                        }
                         Text(formatTime(workoutTimer.exerciseTime))
                             .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(.green)
                     } else if workoutTimer.isResting {
-                        Text("REST")
-                            .font(.caption2)
-                            .foregroundColor(.orange)
+                        HStack(spacing: 4) {
+                            Text("REST")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                            // Active indicator dot
+                            Circle()
+                                .fill(.orange)
+                                .frame(width: 6, height: 6)
+                                .scaleEffect(workoutTimer.isResting ? 1.2 : 1.0)
+                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: workoutTimer.isResting)
+                        }
                         Text(formatTime(workoutTimer.restTime))
                             .font(.title3)
                             .fontWeight(.semibold)
@@ -191,6 +347,15 @@ struct WorkoutTimerView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .background(
+                    // Subtle pulsing background when timer is active
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(workoutTimer.isExercising ? Color.green.opacity(0.1) : 
+                              workoutTimer.isResting ? Color.orange.opacity(0.1) : Color.clear)
+                        .scaleEffect(workoutTimer.isExercising || workoutTimer.isResting ? 1.05 : 1.0)
+                        .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), 
+                                 value: workoutTimer.isExercising || workoutTimer.isResting)
+                )
             }
             .padding(.horizontal)
             
