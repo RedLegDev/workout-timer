@@ -266,6 +266,16 @@ class WorkoutTimer {
 struct WorkoutTimerView: View {
     @State private var workoutTimer = WorkoutTimer()
     
+    // Computed property for the pulsing background style
+    private var pulsingBackground: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(workoutTimer.isExercising ? Color.green.opacity(0.1) : 
+                  workoutTimer.isResting ? Color.orange.opacity(0.1) : Color.clear)
+            .scaleEffect(workoutTimer.isExercising || workoutTimer.isResting ? 1.05 : 1.0)
+            .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), 
+                     value: workoutTimer.isExercising || workoutTimer.isResting)
+    }
+    
     var body: some View {
         VStack(spacing: 8) {
             // Action Buttons - Top for easy access
@@ -332,15 +342,7 @@ struct WorkoutTimerView: View {
                         .foregroundColor(.primary)
                 }
                 .frame(maxWidth: .infinity)
-                .background(
-                    // Subtle pulsing background when timer is active
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(workoutTimer.isExercising ? Color.green.opacity(0.1) : 
-                              workoutTimer.isResting ? Color.orange.opacity(0.1) : Color.clear)
-                        .scaleEffect(workoutTimer.isExercising || workoutTimer.isResting ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), 
-                                 value: workoutTimer.isExercising || workoutTimer.isResting)
-                )
+                .background(pulsingBackground)
                 
                 // Status and Timer Display
                 VStack(spacing: 2) {
@@ -387,15 +389,7 @@ struct WorkoutTimerView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .background(
-                    // Subtle pulsing background when timer is active
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(workoutTimer.isExercising ? Color.green.opacity(0.1) : 
-                              workoutTimer.isResting ? Color.orange.opacity(0.1) : Color.clear)
-                        .scaleEffect(workoutTimer.isExercising || workoutTimer.isResting ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), 
-                                 value: workoutTimer.isExercising || workoutTimer.isResting)
-                )
+                .background(pulsingBackground)
             }
             .padding(.horizontal)
             
