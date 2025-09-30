@@ -9,215 +9,124 @@ import SwiftUI
 import WatchKit
 import AVFoundation
 
+enum WorkoutState {
+    case ready
+    case exercising
+    case resting
+}
+
 @Observable
 class WorkoutTimer {
     var currentSet = 0
-    var isResting = false
-    var isExercising = false
+    var state: WorkoutState = .ready
     private var stateStartTime: Date?
-    var timer: Timer?
-    private var hasPlayedRestCue = false
-    private var hapticTimer: Timer?
-    private var audioTimer: Timer?
+    private var timer: Timer?
     var audioEnabled = true
     
     // Computed properties for current elapsed time
-    var exerciseTime: TimeInterval {
-        guard isExercising, let startTime = stateStartTime else { return 0 }
-        return Date().timeIntervalSince(startTime)
-    }
-    
-    var restTime: TimeInterval {
-        guard isResting, let startTime = stateStartTime else { return 0 }
+    var currentTime: TimeInterval {
+        guard let startTime = stateStartTime else { return 0 }
         return Date().timeIntervalSince(startTime)
     }
     
     func startExercise() {
-        guard !isExercising else { return }
-        
-        isExercising = true
-        isResting = false
+        state = .exercising
         currentSet += 1
-        
-        // Record start time for this state
         stateStartTime = Date()
         
-        // Haptic feedback for starting exercise
         WKInterfaceDevice.current().play(.start)
-        
-        // Start main timer for UI updates (just to trigger view refreshes)
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            // Timer just needs to trigger view updates - time calculation is computed
-        }
-        
-        // Start periodic haptic feedback every 30 seconds
-        startPeriodicHapticFeedback()
-        
-        // Start audio cues every minute
-        startAudioCues()
+        startTimer()
     }
     
     func completeSet() {
-        guard isExercising else { return }
-        
-        // Stop all current timers first
-        stopPeriodicHapticFeedback()
-        stopAudioCues()
-        timer?.invalidate()
-        timer = nil
-        
-        // Update state
-        isExercising = false
-        hasPlayedRestCue = false
-        
-        // Record rest start time
+        state = .resting
         stateStartTime = Date()
         
-        // Set resting state after everything is configured
-        isResting = true
-        
-        // Haptic feedback for completing set
         WKInterfaceDevice.current().play(.success)
-        
-        // Start rest timer
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            // Check for rest cue at 1:30
-            if self.restTime >= 90 && !self.hasPlayedRestCue {
-                self.hasPlayedRestCue = true
-                self.playRestCue()
-            }
-        }
-        
-        // Start periodic haptic feedback for rest period
-        startPeriodicHapticFeedback()
-        
-        // Start audio cues for rest period
-        startAudioCues()
+        // Timer continues running for rest period
     }
     
     func startNextSet() {
-        guard isResting else { return }
+        state = .exercising
+        currentSet += 1
+        stateStartTime = Date()
         
-        stopPeriodicHapticFeedback()
-        stopAudioCues()
-        timer?.invalidate()
-        
-        // Haptic feedback for starting next set
         WKInterfaceDevice.current().play(.start)
-        
-        startExercise()
     }
     
-    func resetExercise() {
-        stopPeriodicHapticFeedback()
-        stopAudioCues()
-        timer?.invalidate()
+    func reset() {
+        stopTimer()
         currentSet = 0
-        isResting = false
-        isExercising = false
-        hasPlayedRestCue = false
-        
-        // Clear timestamp
+        state = .ready
         stateStartTime = nil
         
-        // Haptic feedback for reset
         WKInterfaceDevice.current().play(.click)
     }
     
-    func stopCurrentActivity() {
-        stopPeriodicHapticFeedback()
-        stopAudioCues()
-        timer?.invalidate()
-        isResting = false
-        isExercising = false
-        
-        // Clear timestamp
+    func stop() {
+        stopTimer()
+        state = .ready
         stateStartTime = nil
         
-        // Haptic feedback for stopping
         WKInterfaceDevice.current().play(.stop)
     }
     
-    private func playRestCue() {
-        // Play system sound for rest cue
-        WKInterfaceDevice.current().play(.notification)
-        
-        // Also provide haptic feedback
-        WKInterfaceDevice.current().play(.directionUp)
-    }
-    
-    private func startPeriodicHapticFeedback() {
-        // Provide gentle haptic feedback every 30 seconds to indicate timer is running
-        hapticTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { _ in
-            if self.isExercising || self.isResting {
-                // Gentle tap to indicate timer is still running
-                WKInterfaceDevice.current().play(.click)
-            }
-        }
-    }
-    
-    private func stopPeriodicHapticFeedback() {
-        hapticTimer?.invalidate()
-        hapticTimer = nil
-    }
-    
-    
-    private func startAudioCues() {
-        guard audioEnabled else { return }
-        
-        // Play audio cue every minute to indicate timer is running
-        audioTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { _ in
-            if self.isExercising || self.isResting {
-                // Gentle audio cue to indicate timer is still running
-                WKInterfaceDevice.current().play(.click)
-            }
-        }
-    }
-    
-    private func stopAudioCues() {
-        audioTimer?.invalidate()
-        audioTimer = nil
-    }
-    
-
-    
-    
     func toggleAudio() {
         audioEnabled.toggle()
-        if audioEnabled && (isExercising || isResting) {
-            startAudioCues()
-        } else {
-            stopAudioCues()
+    }
+    
+    private func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            // Provide feedback at key intervals
+            let time = self.currentTime
+            
+            // Rest cue at 90 seconds during rest
+            if self.state == .resting && Int(time) == 90 {
+                WKInterfaceDevice.current().play(.notification)
+            }
+            
+            // Gentle haptic every 30 seconds
+            if Int(time) % 30 == 0 && time > 0 {
+                WKInterfaceDevice.current().play(.click)
+            }
+            
+            // Audio cue every minute if enabled
+            if self.audioEnabled && Int(time) % 60 == 0 && time > 0 {
+                WKInterfaceDevice.current().play(.click)
+            }
         }
+    }
+    
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
     }
 }
 
 struct WorkoutTimerView: View {
     @State private var workoutTimer = WorkoutTimer()
     
-
-    
     var body: some View {
         VStack(spacing: 8) {
             // Action Buttons - Top for easy access
             VStack(spacing: 6) {
-                if !workoutTimer.isExercising && !workoutTimer.isResting {
-                    // Start Exercise Button
+                switch workoutTimer.state {
+                case .ready:
                     Button("Start Set") {
                         workoutTimer.startExercise()
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
-                } else if workoutTimer.isExercising {
-                    // Complete Set Button
+                    
+                case .exercising:
                     Button("Complete Set") {
                         workoutTimer.completeSet()
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .tint(.orange)
-                } else if workoutTimer.isResting {
-                    // Start Next Set Button
+                    
+                case .resting:
                     Button("Start Next Set") {
                         workoutTimer.startNextSet()
                     }
@@ -230,7 +139,7 @@ struct WorkoutTimerView: View {
                 HStack(spacing: 8) {
                     if workoutTimer.currentSet > 0 {
                         Button("New Exercise") {
-                            workoutTimer.resetExercise()
+                            workoutTimer.reset()
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.small)
@@ -266,7 +175,8 @@ struct WorkoutTimerView: View {
                 
                 // Status and Timer Display
                 VStack(spacing: 2) {
-                    if workoutTimer.isExercising {
+                    switch workoutTimer.state {
+                    case .exercising:
                         HStack(spacing: 4) {
                             Text("EXERCISE")
                                 .font(.caption2)
@@ -275,14 +185,15 @@ struct WorkoutTimerView: View {
                             Circle()
                                 .fill(.green)
                                 .frame(width: 6, height: 6)
-                                .scaleEffect(workoutTimer.isExercising ? 1.2 : 1.0)
-                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: workoutTimer.isExercising)
+                                .scaleEffect(1.2)
+                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: workoutTimer.state)
                         }
-                        Text(formatTime(workoutTimer.exerciseTime))
+                        Text(formatTime(workoutTimer.currentTime))
                             .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(.green)
-                    } else if workoutTimer.isResting {
+                        
+                    case .resting:
                         HStack(spacing: 4) {
                             Text("REST")
                                 .font(.caption2)
@@ -291,14 +202,15 @@ struct WorkoutTimerView: View {
                             Circle()
                                 .fill(.orange)
                                 .frame(width: 6, height: 6)
-                                .scaleEffect(workoutTimer.isResting ? 1.2 : 1.0)
-                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: workoutTimer.isResting)
+                                .scaleEffect(1.2)
+                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: workoutTimer.state)
                         }
-                        Text(formatTime(workoutTimer.restTime))
+                        Text(formatTime(workoutTimer.currentTime))
                             .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(.orange)
-                    } else {
+                        
+                    case .ready:
                         Text("READY")
                             .font(.caption2)
                             .foregroundColor(.secondary)
@@ -313,9 +225,9 @@ struct WorkoutTimerView: View {
             .padding(.horizontal)
             
             // Stop button - Below timer when active
-            if workoutTimer.isExercising || workoutTimer.isResting {
+            if workoutTimer.state != .ready {
                 Button("Stop") {
-                    workoutTimer.stopCurrentActivity()
+                    workoutTimer.stop()
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.mini)
