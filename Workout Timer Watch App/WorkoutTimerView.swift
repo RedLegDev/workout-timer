@@ -58,13 +58,14 @@ class WorkoutTimer {
     func completeSet() {
         guard isExercising else { return }
         
+        // Stop all current timers first
         stopPeriodicHapticFeedback()
         stopAudioCues()
         timer?.invalidate()
         timer = nil
         
+        // Update state
         isExercising = false
-        isResting = true
         restTime = 0
         hasPlayedRestCue = false
         
@@ -72,9 +73,13 @@ class WorkoutTimer {
         restStartTime = Date()
         lastUpdateTime = Date()
         
+        // Set resting state after everything is configured
+        isResting = true
+        
         // Haptic feedback for completing set
         WKInterfaceDevice.current().play(.success)
         
+        // Start rest timer
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             self.updateRestTime()
         }
@@ -84,7 +89,6 @@ class WorkoutTimer {
         
         // Start audio cues for rest period
         startAudioCues()
-        
     }
     
     func startNextSet() {
