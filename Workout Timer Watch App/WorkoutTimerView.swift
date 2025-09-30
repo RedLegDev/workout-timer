@@ -153,14 +153,6 @@ struct WorkoutTimerView: View {
                         .controlSize(.small)
                         .tint(.red)
                     }
-                    
-                    // Audio toggle button
-                    Button(workoutTimer.audioEnabled ? "🔊" : "🔇") {
-                        workoutTimer.toggleAudio()
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    .tint(.blue)
                 }
             }
             .padding(.horizontal)
@@ -232,14 +224,24 @@ struct WorkoutTimerView: View {
             }
             .padding(.horizontal)
             
-            // Stop button - Below timer when active
+            // Stop button and audio toggle - Below timer when active
             if workoutTimer.state != .ready {
-                Button("Stop") {
-                    workoutTimer.stop()
+                HStack(spacing: 8) {
+                    Button("Stop") {
+                        workoutTimer.stop()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(.gray)
+                    
+                    // Audio toggle button
+                    Button(workoutTimer.audioEnabled ? "🔊" : "🔇") {
+                        workoutTimer.toggleAudio()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(.blue)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.mini)
-                .tint(.gray)
                 .padding(.horizontal)
             }
         }
