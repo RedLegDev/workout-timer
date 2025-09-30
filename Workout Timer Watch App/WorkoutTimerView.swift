@@ -8,6 +8,7 @@
 import SwiftUI
 import WatchKit
 import AVFoundation
+import Combine
 
 @Observable
 class WorkoutTimer {
@@ -221,6 +222,7 @@ class WorkoutTimer {
 
 struct WorkoutTimerView: View {
     @State private var workoutTimer = WorkoutTimer()
+    @State private var cancellables = Set<AnyCancellable>()
     
     // Computed property for the pulsing background style
     private var pulsingBackground: some View {
@@ -365,7 +367,32 @@ struct WorkoutTimerView: View {
         .onAppear {
             // Refresh time when view appears to ensure accuracy
             workoutTimer.refreshCurrentTime()
+            
+            // Set up app lifecycle observers
+            setupAppLifecycleObservers()
         }
+        .onDisappear {
+            // Clean up observers when view disappears
+            cancellables.removeAll()
+        }
+    }
+    
+    private func setupAppLifecycleObservers() {
+        // Listen for app becoming active (when screen wakes up)
+        NotificationCenter.default.publisher(for: .WKApplicationDidBecomeActive)
+            .sink { _ in
+                // Refresh the timer when app becomes active
+                workoutTimer.refreshCurrentTime()
+            }
+            .store(in: &cancellables)
+        
+        // Listen for app becoming inactive (when screen goes to sleep)
+        NotificationCenter.default.publisher(for: .WKApplicationWillResignActive)
+            .sink { _ in
+                // Optional: You could pause timers here if needed
+                // For now, we'll let them continue running in background
+            }
+            .store(in: &cancellables)
     }
     
     private func formatTime(_ timeInterval: TimeInterval) -> String {
