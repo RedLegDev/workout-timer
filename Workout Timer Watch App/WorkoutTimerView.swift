@@ -387,12 +387,6 @@ struct WorkoutTimerView: View {
             .store(in: &cancellables)
         
         // Listen for app becoming inactive (when screen goes to sleep)
-        NotificationCenter.default.publisher(for: .WKApplicationWillResignActive)
-            .sink { _ in
-                // Optional: You could pause timers here if needed
-                // For now, we'll let them continue running in background
-            }
-            .store(in: &cancellables)
     }
     
     private func formatTime(_ timeInterval: TimeInterval) -> String {
