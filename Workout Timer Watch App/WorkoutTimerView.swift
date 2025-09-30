@@ -22,9 +22,11 @@ class WorkoutTimer {
     private var stateStartTime: Date?
     private var timer: Timer?
     var audioEnabled = true
+    private var _updateTrigger = 0 // Private trigger for UI updates
     
     // Computed properties for current elapsed time
     var currentTime: TimeInterval {
+        _ = _updateTrigger // Access the trigger to make this observable
         guard let startTime = stateStartTime else { return 0 }
         return Date().timeIntervalSince(startTime)
     }
@@ -43,7 +45,7 @@ class WorkoutTimer {
         stateStartTime = Date()
         
         WKInterfaceDevice.current().play(.success)
-        // Timer continues running for rest period
+        // Timer continues running for rest period - no need to restart
     }
     
     func startNextSet() {
@@ -52,6 +54,7 @@ class WorkoutTimer {
         stateStartTime = Date()
         
         WKInterfaceDevice.current().play(.start)
+        // Timer continues running - no need to restart
     }
     
     func reset() {
@@ -76,8 +79,13 @@ class WorkoutTimer {
     }
     
     private func startTimer() {
+        // Stop any existing timer first
+        timer?.invalidate()
+        
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            // Provide feedback at key intervals
+            // Trigger UI updates by changing an observable property
+            self._updateTrigger += 1
+            
             let time = self.currentTime
             
             // Rest cue at 90 seconds during rest
